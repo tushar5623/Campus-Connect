@@ -1,55 +1,53 @@
 import { io } from "socket.io-client";
 
-const SERVER_URL = "http://localhost:5000";
-const TOTAL_BOTS = 51; // Abhi 50 bots se start karte hain
+// --- CONFIGURATION ---
+const SERVER_URL = "http://13.126.87.252:5000"; // Tera AWS Public IP
+const TOTAL_BOTS = 51;
 
-console.log(`\n🤖 PREPARING BOT ARMY... Target: ${SERVER_URL}`);
-console.log(`⚠️ Deploying ${TOTAL_BOTS} bots in 3... 2... 1...\n`);
+console.log(`🤖 PREPARING BOT ARMY... Target: ${SERVER_URL}`);
+console.log(`⚠️ Deploying ${TOTAL_BOTS} bots in 3... 2... 1...`);
 
 for (let i = 1; i <= TOTAL_BOTS; i++) {
-  // Har bot ko connect hone me 100ms ka gap dete hain taaki ekdum se crash na ho
   setTimeout(() => {
-    const socket = io(SERVER_URL);
-    const botEmail = `bot_soldier_${i}@loadtest.com`;
+    const socket = io(SERVER_URL, {
+      transports: ["websocket"], // Fast connection ke liye
+    });
+
+    let spamInterval = null; // Har bot ka apna private timer
 
     socket.on("connect", () => {
       console.log(`🟢 Bot ${i} Connected! (${socket.id})`);
-      
-      // 1. Bot ko Register karo
-      socket.emit("register_user", botEmail);
-      
-      // 2. Turant Match find karne bhejo
+      socket.emit("register_user", `bot${i}@kiet.edu`);
       socket.emit("find_match");
     });
 
     socket.on("matched", (data) => {
-      console.log(`⚔️ Bot ${i} locked target! Room: ${data.roomId}`);
-      
-      let msgCount = 1;
-      // Interval ko ek variable me save karo taaki baad me rok sakein
-      const spamInterval = setInterval(() => {
+      console.log(`⚔️ Bot ${i} matched! Room: ${data.roomId}`);
+
+      // 1. Purane kachre ki safai
+      if (spamInterval) clearInterval(spamInterval);
+      socket.off("partner_left");
+
+      // 2. Partner ke jaane ka listener
+      socket.on("partner_left", () => {
+        console.log(`💔 Bot ${i}'s partner left. Searching again...`);
+        if (spamInterval) clearInterval(spamInterval);
+        socket.emit("find_match");
+      });
+
+      // 3. Spamming shuru (3 seconds gap)
+      spamInterval = setInterval(() => {
         socket.emit("send_message", {
           roomId: data.roomId,
-          message: `[Bot ${i}]: Initiating load test sequence... Message #${msgCount}`
+          message: "Campus Connect AWS Test: Bot Army is active! 🚀",
         });
-        
-        socket.emit("typing", data.roomId);
-        setTimeout(() => socket.emit("stop_typing", data.roomId), 1000);
-        
-        msgCount++;
-      }, 2000); 
-
-      // 👇 NAYA LOGIC: Jab partner "Next" daba kar chala jaye
-      socket.on("partner_left", () => {
-        console.log(`💔 Bot ${i}'s partner left. Stopping spam and searching again...`);
-        clearInterval(spamInterval); // Purane room me spam rok do
-        socket.emit("find_match"); // Wapas line me lag jao!
-      });
+      }, 3000);
     });
 
     socket.on("disconnect", () => {
-      console.log(`🔴 Bot ${i} went offline.`);
+      if (spamInterval) clearInterval(spamInterval);
+      console.log(`🔴 Bot ${i} Disconnected.`);
     });
 
-  }, i * 100); // Staggered deployment (Bot 1 at 100ms, Bot 2 at 200ms, etc.)
+  }, i * 200); // Har bot ke beech 200ms ka gap taaki AWS chillaye nahi
 }

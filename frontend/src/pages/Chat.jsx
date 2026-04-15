@@ -6,7 +6,9 @@ import { Send, LogOut, AlertTriangle, Search, UserCheck, SkipForward } from 'luc
 import { useEffect, useState, useRef } from 'react';
 import socket from '../socket'; 
 
+
 const Chat = () => {
+ 
   const [appState, setAppState] = useState('idle'); 
   const [roomId, setRoomId] = useState(null);
   const [messages, setMessages] = useState([]); 
