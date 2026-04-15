@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
 // Backend ka URL yahan denge
-const socket = io('http://13.126.87.252:5000');
+const socket = io('https://api-campusconnect.me');
 
 export default socket;  

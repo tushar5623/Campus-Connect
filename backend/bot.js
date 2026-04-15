@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // --- CONFIGURATION ---
-const SERVER_URL = "http://13.126.87.252:5000"; // Tera AWS Public IP
+const SERVER_URL = "https://api-campusconnect.me"; // Tera AWS Public IP
 const TOTAL_BOTS = 51;
 
 console.log(`🤖 PREPARING BOT ARMY... Target: ${SERVER_URL}`);
