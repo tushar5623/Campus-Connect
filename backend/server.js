@@ -9,12 +9,17 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app); 
 
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "https://campus-connect-murex.vercel.app"],
+    methods: ["GET", "POST"],
+    credentials: true
+}))
+
 app.use(express.json());
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"], 
+    origin: ["http://localhost:5173", "https://campus-connect-murex.vercel.app"], 
     methods: ["GET", "POST"],
   },
 });
