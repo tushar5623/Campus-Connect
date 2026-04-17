@@ -30,81 +30,70 @@ const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-
+useEffect(() => {
     const myEmail = localStorage.getItem('userEmail');
-    const myName = localStorage.getItem('userName'); // <-- Name nikalo
+    const myName = localStorage.getItem('userName');
+    
     if (!myEmail) {
-      window.location.href = '/'; // Agar bina login aaya toh bahar fenk do
+      window.location.href = '/';
       return;
     }
-    if (myName) {
-      setUserName(myName.split(' ')[0]); // Sirf First Name dikhayenge (e.g., "Tushar")
-    }
-    // 1. BULLETPROOF REGISTRATION
-    const registerMe = () => {
+    if (myName) setUserName(myName.split(' ')[0]);
+
+    // 🕵️‍♂️ JASOOS FUNCTION: Jo pakka register karega
+    const handleRegister = () => {
+      console.log("🚀 Attempting to register with backend...");
       socket.emit('register_user', myEmail);
     };
 
+    // Agar socket pehle se connected hai
     if (socket.connected) {
-      registerMe();
+      handleRegister();
     }
-    socket.on('connect', registerMe);
 
-    // 2. LIVE COUNT LISTENER
+    // Event Listeners setup
+    socket.on('connect', handleRegister);
+    
     socket.on('live_user_count', (count) => {
-      console.log("🟢 Live count updated:", count); // F12 console me dekhne ke liye
+      console.log("🟢 Live count updated:", count);
       setOnlineUsers(count);
     });
 
-    if (socket.connected) {
-      socket.emit('register_user', myEmail);
-    }
-    // 🟢 LIVE USER COUNT LISTENER
-    socket.on('online_users', (count) => {
-      setOnlineUsers(count);
-    });
-    socket.on('connect', () => {
-      console.log('Connected to backend with ID:', socket.id);
-      socket.emit('register_user', myEmail);
-    });
-
-    socket.on('waiting', (msg) => {
-      setAppState('searching');
-    });
-
+    socket.on('waiting', () => setAppState('searching'));
+    
     socket.on('matched', (data) => {
       setRoomId(data.roomId);
       setAppState('chatting');
       setMessages([]); 
     });
 
-    socket.on('receive_message', (messageData) => {
-      setMessages((prevMessages) => [...prevMessages, messageData]);
-    });
+    socket.on('receive_message', (msg) => setMessages(prev => [...prev, msg]));
+    
     socket.on('stranger_typing', () => setIsStrangerTyping(true));
     socket.on('stranger_stopped', () => setIsStrangerTyping(false));
-
-    // 🚨 NAYA LISTENER: Jab partner chat chhod de
-    socket.on('partner_left', (systemMessage) => {
-      setMessages((prev) => [...prev, { text: systemMessage, sender: 'system' }]);
+    
+    socket.on('partner_left', (msg) => {
+      setMessages(prev => [...prev, { text: msg, sender: 'system' }]);
     });
-    // 🚨 NAYA LISTENER: Agar backend ne ban message bheja
+
     socket.on('you_are_blocked', () => {
-      setIsBanned(true); // User ko Banned screen dikhao
+      console.log("🚨 BAN HAMMER RECEIVED!");
+      setIsBanned(true);
     });
 
+    // 🧹 CLEANUP: Sabse zaroori cheez
     return () => {
-      socket.off('connect');
+      socket.off('connect', handleRegister);
+      socket.off('live_user_count');
       socket.off('waiting');
       socket.off('matched');
       socket.off('receive_message');
-      socket.off('partner_left'); // Cleanup
+      socket.off('partner_left');
       socket.off('you_are_blocked');
       socket.off('stranger_typing');
       socket.off('stranger_stopped');
     };
-  }, []);
+  }, []); // dependency array khali rakho kyunki socket singleton hai
 
   const startMatching = () => {
     socket.emit('find_match');
@@ -219,11 +208,11 @@ const Chat = () => {
           Your account has been permanently suspended due to multiple reports of policy violations from other students.
         </p>
         <button 
-          onClick={() => window.location.href = '/'}
-          className="px-6 py-3 bg-slate-800 text-white font-semibold rounded-xl hover:bg-slate-700 transition-colors"
-        >
-          Go Back to Home
-        </button>
+  onClick={handleFullLogout} 
+  className="px-6 py-3 bg-slate-800 text-white font-semibold rounded-xl hover:bg-slate-700 transition-colors"
+>
+  Sign Out & Go Home
+</button>
       </div>
     );
   }
