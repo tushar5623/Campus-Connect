@@ -1,9 +1,10 @@
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import { Link, ShieldCheck, ArrowRight, LogOut } from 'lucide-react'; // NAYA: LogOut icon import kiya
+import { Link, ShieldCheck, ArrowRight, LogOut, Sun, Moon } from 'lucide-react'; // NAYA: LogOut icon import kiya
 import { auth, provider } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'; 
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,19 +14,35 @@ const Login = () => {
   const [userName, setUserName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showRules, setShowRules] = useState(false); 
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
-  // 1. Auto-Login Check
+// 1. Auto-Login Check
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (user && user.email.endsWith('@gmail.com')) {
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userName', user.displayName); 
+      setIsLoggedIn(true);
+      setUserName(user.displayName.split(' ')[0]); 
+    }
+  });
+  return () => unsubscribe();
+}, []);
+  
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith('@gmail.com')) {
-        localStorage.setItem('userEmail', user.email);
-        localStorage.setItem('userName', user.displayName); 
-        setIsLoggedIn(true);
-        setUserName(user.displayName.split(' ')[0]); 
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]); // <-- Notice: Ye 'theme' change hone par chalega
+
+  // --- NAYA FUNCTION: Button click pe theme badalne ke liye ---
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+  
 
   // 2. Manual Google Login
   const handleLogin = async () => {
@@ -69,60 +86,77 @@ const Login = () => {
     }
   };
 
-  return (
-<div className="relative flex flex-col items-center justify-center min-h-[100dvh] bg-slate-950 px-4...">      
+return (
+    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] bg-slate-50 dark:bg-slate-950 px-4 font-sans overflow-hidden transition-colors duration-500">
+      
+      {/* 🌓 THEME TOGGLE BUTTON */}
+      <button 
+        onClick={toggleTheme} 
+        className="absolute top-4 right-4 md:top-6 md:right-8 z-50 p-2.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-yellow-400 hover:scale-110 transition-transform shadow-md"
+      >
+        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
       {/* ---------------- MAIN LOGIN SCREEN ---------------- */}
       <div className={`transition-all duration-500 w-full flex flex-col items-center ${showRules ? 'opacity-20 blur-sm pointer-events-none' : 'opacity-100'}`}>
+        
         <div className="text-center mb-12 mt-8">
           <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight leading-tight">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-sm">
+            
+            {/* FIX 1: Light mode mein Dark Slate (Almost Black) Gradient, Dark mode mein Neon Cyan/Blue */}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 dark:from-cyan-400 dark:to-blue-500 drop-shadow-sm transition-colors duration-500">
               CAMPUS CONNECT:
             </span>
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-purple-400 drop-shadow-sm">
+            
+            {/* FIX 2: Light mode mein Deep Blue/Purple Gradient, Dark mode mein Neon Teal/Purple */}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-700 dark:from-teal-300 dark:to-purple-400 drop-shadow-sm transition-colors duration-500">
               Meet Your Community
             </span>
+            
           </h1>
-          <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-light mt-4">
+          
+          <p className="text-slate-800 dark:text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-medium md:font-light mt-4 transition-colors">
             A safe and friendly space for every student in our college. Instant connections.
           </p>
         </div>
 
-        <div className="w-[90%] md:w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center">
+        {/* 📦 THE MAIN CARD */}
+        <div className="w-[90%] md:w-full max-w-md bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-slate-700/50 rounded-3xl p-6 md:p-8 shadow-xl dark:shadow-2xl flex flex-col items-center transition-colors duration-500">
           
           {isLoggedIn ? (
-            // 🟢 STATE 1: AGAR USER LOGGED IN HAI
+            // 🟢 LOGGED IN STATE
             <div className="flex flex-col items-center gap-6 w-full">
-              <div className="text-2xl font-bold text-white text-center">
-                Hi, <span className="text-cyan-400">{userName}</span> 👋
+              <div className="text-2xl font-bold text-slate-900 dark:text-white text-center transition-colors">
+                Hi, <span className="text-cyan-700 dark:text-cyan-400">{userName}</span> 👋
               </div>
-              <p className="text-slate-400 text-sm text-center">
-                Your college ID is verified. You are ready to join the campus Connect.
+              {/* FIX 2: Stronger text color for card subtitle */}
+              <p className="text-slate-700 dark:text-slate-400 text-sm text-center font-medium dark:font-normal transition-colors">
+                Your college ID is verified. You are ready to join the campus chat.
               </p>
               
-              {/* BUTTONS CONTAINER */}
               <div className="w-full flex flex-col gap-3">
                 <button 
                   onClick={() => setShowRules(true)}
-                  className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-lg font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                  className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 dark:from-cyan-500 dark:to-blue-600 text-white text-lg font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-lg dark:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
                 >
                   Enter the Room <ArrowRight className="w-5 h-5" />
                 </button>
                 
-                {/* 🔴 NAYA SIGN OUT BUTTON */}
+                {/* FIX 3: Sign Out button colors adjusted for better contrast */}
                 <button 
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800/50 text-slate-300 text-sm font-semibold rounded-xl hover:bg-slate-800 border border-slate-700 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-slate-200 dark:bg-slate-800/50 text-slate-800 dark:text-slate-300 text-sm font-bold dark:font-semibold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition-colors"
                 >
                   <LogOut className="w-4 h-4" /> Sign Out
                 </button>
               </div>
             </div>
           ) : (
-            // 🔵 STATE 2: LOGGED OUT (Google Button)
+            // 🔵 LOGGED OUT STATE
             <>
-              <div className="mb-8 p-5 bg-slate-800/80 rounded-2xl shadow-inner border border-slate-700">
-                <Link className="w-10 h-10 text-cyan-400 transform -rotate-45" />
+              <div className="mb-8 p-5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl shadow-inner border border-slate-300 dark:border-slate-700 transition-colors">
+                <Link className="w-10 h-10 text-cyan-600 dark:text-cyan-400 transform -rotate-45 transition-colors" />
               </div>
               <button 
                 onClick={handleLogin}
@@ -142,63 +176,56 @@ const Login = () => {
               </button>
             </>
           )}
-
         </div>
         
+        {/* FIX 4: Footer text visibility */}
         {!isLoggedIn && (
-          <p className="mt-10 text-slate-500 text-sm tracking-wide">
+          <p className="mt-10 text-slate-700 dark:text-slate-500 text-sm font-medium dark:font-normal tracking-wide transition-colors">
             Only validated college emails allowed.
           </p>
         )}
       </div>
 
-     {/* ---------------- RULES POPUP (MODAL) ---------------- */}
-{showRules && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    
-    {/* FIX 1: w-full ki jagah w-[95%] kiya taaki chote screens pe edges na chhuwe. p-5 for mobile, p-8 for desktop */}
-    <div className="bg-slate-900 border border-slate-700 w-[95%] max-w-lg rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-2xl animate-in fade-in zoom-in duration-300 relative">
-      
-      {/* FIX 2: Text size chota kiya mobile ke liye (text-xl) */}
-      <h2 className="text-xl md:text-2xl font-bold text-cyan-400 mb-4 md:mb-6 flex items-center gap-2">
-        <ShieldCheck className="w-6 h-6 md:w-8 md:h-8" />
-        Community Guidelines
-      </h2>
-      
-      <div className="space-y-3 text-slate-300 text-xs md:text-sm mb-6 md:mb-8">
-        
-        {/* FIX 3: Box ki padding thodi kam ki */}
-        <div className="bg-slate-800/50 p-3 md:p-4 rounded-xl border border-pink-500/20">
-          <p className="font-bold text-pink-400 mb-1">🚨 The 3-Report Rule</p>
-          <p>If you receive 3 verified reports from different users, your account will be permanently blocked. No exceptions.</p>
-        </div>
-        
-        <ul className="list-disc list-inside space-y-1.5 md:space-y-2 px-1 md:px-2">
-          <li>Strictly no abusive language, hate speech, or harassment. We maintain a zero-tolerance policy.</li>
-          <li>Uphold the decorum and integrity of KIET.</li>
-          <li>Do not share sensitive personal information (phone numbers, exact locations) in public chats.</li>
-          <li>Any spamming or unauthorized promotions will result in an immediate ban.</li>
-        </ul>
-      </div>
+      {/* ---------------- RULES POPUP (MODAL) ---------------- */}
+      {showRules && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm transition-colors duration-500">
+          <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 w-[95%] max-w-lg rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-2xl animate-in fade-in zoom-in duration-300 relative transition-colors duration-500">
+            
+            <h2 className="text-xl md:text-2xl font-bold text-cyan-700 dark:text-cyan-400 mb-4 md:mb-6 flex items-center gap-2 transition-colors">
+              <ShieldCheck className="w-6 h-6 md:w-8 md:h-8" />
+              Community Guidelines
+            </h2>
+            
+            <div className="space-y-3 text-slate-800 dark:text-slate-300 text-xs md:text-sm mb-6 md:mb-8 font-medium dark:font-normal transition-colors">
+              <div className="bg-pink-50 dark:bg-slate-800/50 p-3 md:p-4 rounded-xl border border-pink-300 dark:border-pink-500/20 transition-colors">
+                <p className="font-bold text-pink-700 dark:text-pink-400 mb-1">🚨 The 3-Report Rule</p>
+                <p>If you receive 3 verified reports from different users, your account will be permanently blocked. No exceptions.</p>
+              </div>
+              <ul className="list-disc list-inside space-y-1.5 md:space-y-2 px-1 md:px-2">
+                <li>Strictly no abusive language, hate speech, or harassment. We maintain a zero-tolerance policy.</li>
+                <li>Uphold the decorum and integrity of KIET.</li>
+                <li>Do not share sensitive personal information (phone numbers, exact locations) in public chats.</li>
+                <li>Any spamming or unauthorized promotions will result in an immediate ban.</li>
+              </ul>
+            </div>
 
-      <div className="flex gap-3 md:gap-4">
-        {/* FIX 4: Button text aur padding mobile ke hisaab se compact ki */}
-        <button 
-          onClick={() => setShowRules(false)}
-          className="w-1/3 py-3 md:py-4 bg-slate-800 rounded-xl font-bold text-slate-300 hover:bg-slate-700 transition-colors border border-slate-700 text-sm md:text-base"
-        >
-          Back
-        </button>
-        <button 
-          onClick={() => navigate('/chat')}
-          className="w-2/3 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-bold text-white hover:scale-[1.02] transition-transform shadow-[0_0_15px_rgba(6,182,212,0.3)] text-sm md:text-base"
-        >
-          I Agree, Enter Room
-        </button>
-      </div>
-    </div>
-  </div>
-)}    
+            <div className="flex gap-3 md:gap-4">
+              <button 
+                onClick={() => setShowRules(false)}
+                className="w-1/3 py-3 md:py-4 bg-slate-200 dark:bg-slate-800 rounded-xl font-bold text-slate-800 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors border border-slate-300 dark:border-slate-700 text-sm md:text-base"
+              >
+                Back
+              </button>
+              <button 
+                onClick={() => navigate('/chat')}
+                className="w-2/3 py-3 md:py-4 bg-gradient-to-r from-cyan-600 to-blue-700 dark:from-cyan-500 dark:to-blue-600 rounded-xl font-bold text-white hover:scale-[1.02] transition-transform shadow-md text-sm md:text-base"
+              >
+                I Agree, Enter Room
+              </button>
+            </div>
+          </div>
+        </div>
+      )}      
     </div>
   );
 };
