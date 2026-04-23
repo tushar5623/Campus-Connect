@@ -197,7 +197,7 @@ useEffect(() => {
   // 🛑 AGAR USER BANNED HAI TOH YE SCREEN DIKHEGI
   if (isBanned) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 px-4 text-center font-sans">
+      <div className="relative flex flex-col items-center justify-center min-h-[100dvh] bg-slate-950 px-4...">
         <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
           <AlertTriangle size={48} className="text-red-500" />
         </div>
@@ -269,7 +269,7 @@ useEffect(() => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col">
+      <main className="flex-1 overflow-y-auto p-4 flex flex-col pb-20 md:pb-4">
         
         {appState === 'idle' && (
           <div className="flex-1 flex flex-col items-center justify-center text-center">
@@ -367,8 +367,8 @@ useEffect(() => {
       </main>
 
       {appState === 'chatting' && (
-        <footer className="p-4 bg-slate-900 border-t border-slate-800">
-          <form onSubmit={sendMessage} className="max-w-5xl mx-auto flex gap-2 md:gap-4">
+        <footer className="fixed bottom-0 left-0 right-0 p-3 bg-slate-900 border-t border-slate-800 pb-safe md:relative">
+          <form onSubmit={sendMessage} className="max-w-5xl mx-auto flex gap-2">
             <input
               type="text"
               value={inputMessage}

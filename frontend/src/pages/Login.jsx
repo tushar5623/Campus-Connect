@@ -70,8 +70,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-slate-950 px-4 font-sans overflow-hidden">
-      
+<div className="relative flex flex-col items-center justify-center min-h-[100dvh] bg-slate-950 px-4...">      
       {/* ---------------- MAIN LOGIN SCREEN ---------------- */}
       <div className={`transition-all duration-500 w-full flex flex-col items-center ${showRules ? 'opacity-20 blur-sm pointer-events-none' : 'opacity-100'}`}>
         <div className="text-center mb-12 mt-8">
@@ -153,43 +152,53 @@ const Login = () => {
         )}
       </div>
 
-      {/* ---------------- RULES POPUP (MODAL) ---------------- */}
-      {showRules && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-3xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300 relative">
-            <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-2">
-              <ShieldCheck className="w-8 h-8" />
-              Community Guidelines
-            </h2>
-            <div className="space-y-4 text-slate-300 text-sm md:text-base mb-8">
-              <div className="bg-slate-800/50 p-4 rounded-xl border border-pink-500/20">
-                <p className="font-bold text-pink-400 mb-1">🚨 The 3-Report Rule</p>
-                <p>If you receive 3 verified reports from different users, your account will be permanently blocked. No exceptions.</p>
-              </div>
-              <ul className="list-disc list-inside space-y-2 px-2">
-                <li>Strictly no abusive language, hate speech, or harassment. We maintain a zero-tolerance policy.</li>
-                <li>Uphold the decorum and integrity of KIET.</li>
-                <li>Do not share sensitive personal information (phone numbers, exact locations) in public chats.</li>
-                <li>Any form of spamming, soliciting, or unauthorized promotions will result in an immediate ban.</li>
-              </ul>
-            </div>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setShowRules(false)}
-                className="w-1/3 py-4 bg-slate-800 rounded-xl font-bold text-slate-300 hover:bg-slate-700 transition-colors border border-slate-700"
-              >
-                Back
-              </button>
-              <button 
-                onClick={() => navigate('/chat')}
-                className="w-2/3 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-bold text-white hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(6,182,212,0.3)]"
-              >
-                I Agree, Enter Room
-              </button>
-            </div>
-          </div>
+     {/* ---------------- RULES POPUP (MODAL) ---------------- */}
+{showRules && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    
+    {/* FIX 1: w-full ki jagah w-[95%] kiya taaki chote screens pe edges na chhuwe. p-5 for mobile, p-8 for desktop */}
+    <div className="bg-slate-900 border border-slate-700 w-[95%] max-w-lg rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-2xl animate-in fade-in zoom-in duration-300 relative">
+      
+      {/* FIX 2: Text size chota kiya mobile ke liye (text-xl) */}
+      <h2 className="text-xl md:text-2xl font-bold text-cyan-400 mb-4 md:mb-6 flex items-center gap-2">
+        <ShieldCheck className="w-6 h-6 md:w-8 md:h-8" />
+        Community Guidelines
+      </h2>
+      
+      <div className="space-y-3 text-slate-300 text-xs md:text-sm mb-6 md:mb-8">
+        
+        {/* FIX 3: Box ki padding thodi kam ki */}
+        <div className="bg-slate-800/50 p-3 md:p-4 rounded-xl border border-pink-500/20">
+          <p className="font-bold text-pink-400 mb-1">🚨 The 3-Report Rule</p>
+          <p>If you receive 3 verified reports from different users, your account will be permanently blocked. No exceptions.</p>
         </div>
-      )}      
+        
+        <ul className="list-disc list-inside space-y-1.5 md:space-y-2 px-1 md:px-2">
+          <li>Strictly no abusive language, hate speech, or harassment. We maintain a zero-tolerance policy.</li>
+          <li>Uphold the decorum and integrity of KIET.</li>
+          <li>Do not share sensitive personal information (phone numbers, exact locations) in public chats.</li>
+          <li>Any spamming or unauthorized promotions will result in an immediate ban.</li>
+        </ul>
+      </div>
+
+      <div className="flex gap-3 md:gap-4">
+        {/* FIX 4: Button text aur padding mobile ke hisaab se compact ki */}
+        <button 
+          onClick={() => setShowRules(false)}
+          className="w-1/3 py-3 md:py-4 bg-slate-800 rounded-xl font-bold text-slate-300 hover:bg-slate-700 transition-colors border border-slate-700 text-sm md:text-base"
+        >
+          Back
+        </button>
+        <button 
+          onClick={() => navigate('/chat')}
+          className="w-2/3 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-bold text-white hover:scale-[1.02] transition-transform shadow-[0_0_15px_rgba(6,182,212,0.3)] text-sm md:text-base"
+        >
+          I Agree, Enter Room
+        </button>
+      </div>
+    </div>
+  </div>
+)}    
     </div>
   );
 };
