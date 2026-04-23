@@ -88,7 +88,7 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-2xl flex flex-col items-center">
+        <div className="w-[90%] md:w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center">
           
           {isLoggedIn ? (
             // 🟢 STATE 1: AGAR USER LOGGED IN HAI
