@@ -14,7 +14,7 @@ const Login = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith('@gmail.com')) {
+      if (user && user.email.endsWith('@kiet.edu')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName); 
         setIsLoggedIn(true);
@@ -30,7 +30,7 @@ const Login = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      if (user.email.endsWith('@gmail.com')) {
+      if (user.email.endsWith('@kiet.edu')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName);
         setIsLoggedIn(true);
@@ -38,7 +38,7 @@ const Login = () => {
         toast.success('Successfully verified KIET ID!');
       } else {
         await signOut(auth);
-        toast.error('Only @gmail.com emails are allowed. Access Denied.', { duration: 4000 });
+        toast.error('Only @kiet.edu emails are allowed. Access Denied.', { duration: 4000 });
       }
     } catch (error) {
       console.error("Login Failed:", error);

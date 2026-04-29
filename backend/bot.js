@@ -17,7 +17,7 @@ for (let i = 1; i <= TOTAL_BOTS; i++) {
 
     socket.on("connect", () => {
       console.log(`🟢 Bot ${i} Connected! (${socket.id})`);
-      socket.emit("register_user", `bot${i}@gmail.com`);
+      socket.emit("register_user", `bot${i}@kiet.edu`);
       socket.emit("find_match");
     });
 
