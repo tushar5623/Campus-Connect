@@ -63,7 +63,8 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login Failed:", error);
-      toast.error('Login failed. Please try again.');
+      // Asli error screen par dikhane ke liye:
+      toast.error(`Error: ${error.message || JSON.stringify(error)}`, { duration: 6000 });
     } finally {
       setIsLoading(false);
     }

@@ -1,8 +1,6 @@
-<?xml version='1.0' encoding='utf-8'?>
-<string name="server_client_id">640908739685-gpadvce0rn61vbjgfqbdh646ng0al4l2.apps.googleusercontent.com</string>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Campus Connect</string>
     <string name="title_activity_main">Campus Connect</string>
-    <string name="package_name">com.campusconnect.app</string>
-    <string name="custom_url_scheme">com.campusconnect.app</string>
+    <string name="server_client_id">640908739685-gpadvce0rn61vbjgfqbdh646ng0al4l2.apps.googleusercontent.com</string>
 </resources>

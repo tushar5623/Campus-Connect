@@ -2,5 +2,12 @@
   "appId": "com.campusconnect.app",
   "appName": "Campus Connect",
   "webDir": "dist",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "YAHAN_APNI_WEB_CLIENT_ID_PASTE_KARO",
+      "forceCodeForRefreshToken": true
+    }
+  }
 }
