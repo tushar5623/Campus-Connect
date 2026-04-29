@@ -1,3 +1,82 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* =========================================
+   2. EXACT REACT BITS RADAR BACKGROUND
+   ========================================= */
+.radar-container {
+  position: absolute;
+  inset: 0;
+  background-color: #0a0410; /* Ekdum deep dark purple/black background */
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Gol Circles (Concentric Rings) */
+.radar-rings {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vw;
+  transform: translate(-50%, -50%);
+  background-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    transparent 0,
+    transparent 50px, /* Ring ke beech ka gap */
+    rgba(217, 70, 239, 0.25) 51px /* Fuchsia/Purple glow wali lines */
+  );
+}
+
+/* Seedhi Lines (Crosshairs) */
+.radar-lines {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vw;
+  transform: translate(-50%, -50%);
+  background-image: 
+    linear-gradient(0deg, transparent 49.9%, rgba(217, 70, 239, 0.3) 49.9%, rgba(217, 70, 239, 0.3) 50.1%, transparent 50.1%),
+    linear-gradient(90deg, transparent 49.9%, rgba(217, 70, 239, 0.3) 49.9%, rgba(217, 70, 239, 0.3) 50.1%, transparent 50.1%),
+    linear-gradient(45deg, transparent 49.9%, rgba(217, 70, 239, 0.2) 49.9%, rgba(217, 70, 239, 0.2) 50.1%, transparent 50.1%),
+    linear-gradient(-45deg, transparent 49.9%, rgba(217, 70, 239, 0.2) 49.9%, rgba(217, 70, 239, 0.2) 50.1%, transparent 50.1%);
+}
+
+/* Ghoomne wali Radar Beam */
+.radar-sweep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150vw;
+  height: 150vw;
+  margin-top: -75vw;
+  margin-left: -75vw;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    transparent 280deg,
+    rgba(217, 70, 239, 0.1) 330deg,
+    rgba(217, 70, 239, 0.85) 360deg /* Bright sweep edge */
+  );
+  border-radius: 50%;
+  animation: radar-spin 3.5s linear infinite; /* Speed of rotation */
+}
+
+/* Center ka Glowing Dot */
+.radar-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 5px rgba(217, 70, 239, 0.9);
+}
+
+@keyframes radar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
