@@ -1,0 +1,6 @@
+{
+  "appId": "com.campusconnect.app",
+  "appName": "Campus Connect",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

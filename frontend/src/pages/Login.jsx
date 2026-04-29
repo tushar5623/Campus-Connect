@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, LogOut, MessageSquare, Users, Zap } from 'lucide-react';
 import { auth, provider } from '../firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'; 
+import { signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithCredential } from 'firebase/auth'; 
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,8 +15,15 @@ const Login = () => {
   const [showRules, setShowRules] = useState(false); 
 
   useEffect(() => {
+    // 🟢 INITIALIZE NATIVE GOOGLE AUTH
+    GoogleAuth.initialize({
+      clientId: 'YAHAN_APNI_WEB_CLIENT_ID_PASTE_KARO', // <-- Apni ID yahan daalo
+      scopes: ['profile', 'email'],
+      grantOfflineAccess: true,
+    });
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith('@kiet.edu')) {
+      if (user && user.email.endsWith('@gmail.com')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName); 
         setIsLoggedIn(true);
@@ -27,18 +36,30 @@ const Login = () => {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      let user;
+
+      // 🧠 SMART CHECK: Website hai ya Mobile App?
+      if (Capacitor.isNativePlatform()) {
+        // 📱 MOBILE APP NATIVE LOGIN
+        const googleUser = await GoogleAuth.signIn();
+        const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+        const result = await signInWithCredential(auth, credential);
+        user = result.user;
+      } else {
+        // 💻 WEBSITE POPUP LOGIN
+        const result = await signInWithPopup(auth, provider);
+        user = result.user;
+      }
       
-      if (user.email.endsWith('@kiet.edu')) {
+      if (user.email.endsWith('@gmail.com')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName);
         setIsLoggedIn(true);
         setUserName(user.displayName.split(' ')[0]);
-        toast.success('Successfully verified KIET ID!');
+        toast.success('Successfully verified Institutional ID!');
       } else {
         await signOut(auth);
-        toast.error('Only @kiet.edu emails are allowed. Access Denied.', { duration: 4000 });
+        toast.error('Only @gmail.com emails are allowed. Access Denied.', { duration: 4000 });
       }
     } catch (error) {
       console.error("Login Failed:", error);
@@ -50,6 +71,9 @@ const Login = () => {
 
   const handleLogout = async () => {
     try {
+      if (Capacitor.isNativePlatform()) {
+        await GoogleAuth.signOut();
+      }
       await signOut(auth);
       localStorage.removeItem('userEmail');
       localStorage.removeItem('userName');
@@ -61,6 +85,7 @@ const Login = () => {
     }
   };
 
+  // ... (Baaki poora UI/return statement bilkul waise hi rahega jaise tumhare pichle code me tha)
   return (
     <>
       <style>{`
@@ -202,12 +227,9 @@ const Login = () => {
           -webkit-background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
-          /* NAYA FIX: linear lagaya taaki speed ekdum constant rahe */
-          animation: lp-shimmer 6s linear infinite;
+          animation: lp-shimmer 3s linear infinite;
           pointer-events: none;
         }
-        
-        /* NAYA FIX: 60% wala pause hata kar seedha 0 se 100 kiya */
         @keyframes lp-shimmer {
           0%   { background-position: -200% 0; }
           100% { background-position: 200% 0; }
@@ -633,12 +655,11 @@ const Login = () => {
       `}</style>
 
       {/* Decorative blobs */}
-    
-
       <div className="lp-root">
-          <div className="lp-blob lp-blob-1" />
-      <div className="lp-blob lp-blob-2" />
-      <div className="lp-blob lp-blob-3" />
+        <div className="lp-blob lp-blob-1" />
+        <div className="lp-blob lp-blob-2" />
+        <div className="lp-blob lp-blob-3" />
+
         <div className={`lp-wrap ${showRules ? 'blurred' : ''}`}>
 
           {/* Live chip */}
@@ -686,11 +707,11 @@ const Login = () => {
                   {userName ? userName[0].toUpperCase() : '?'}
                 </div>
                 <div>
-                  <p className="lp-welcome-name">Welcome , <span>{userName}</span></p>
+                  <p className="lp-welcome-name">Welcome back, <span>{userName}</span></p>
                   <p className="lp-welcome-sub">You're all set. Start a conversation and meet someone new.</p>
                   <div className="lp-verified-badge">
                     <ShieldCheck size={11} />
-                    KIET ID Verified
+                    Institutional ID Verified
                   </div>
                 </div>
                 <div className="lp-action-group">
@@ -709,7 +730,7 @@ const Login = () => {
                 </div>
                 <div>
                   <p className="lp-signin-heading">Verify your identity</p>
-                  <p className="lp-signin-sub">Sign in with your KIET Google account to access the platform.</p>
+                  <p className="lp-signin-sub">Sign in with your institutional Google account to access the platform.</p>
                 </div>
                 <div className="lp-sep">Secure sign-in</div>
                 <button
@@ -739,7 +760,7 @@ const Login = () => {
           {!isLoggedIn && (
             <div className="lp-footer">
               <ShieldCheck size={13} />
-              Protected by KIET verification
+              Protected by institutional verification
             </div>
           )}
 

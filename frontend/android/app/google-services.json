@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "640908739685",
+    "project_id": "new-omegle-68065",
+    "storage_bucket": "new-omegle-68065.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:640908739685:android:2a0eec59db646e4245728c",
+        "android_client_info": {
+          "package_name": "com.campusconnect.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "640908739685-gpadvce0rn61vbjgfqbdh646ng0al4l2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrXAOUIzcaO3UJESnGQ-WP8Jr-HVjLCBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "640908739685-gpadvce0rn61vbjgfqbdh646ng0al4l2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
