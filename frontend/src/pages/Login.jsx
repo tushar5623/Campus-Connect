@@ -23,7 +23,7 @@ const Login = () => {
     });
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith('@gmail.com')) {
+      if (user && user.email.endsWith('@kiet.edu')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName); 
         setIsLoggedIn(true);
@@ -51,15 +51,15 @@ const Login = () => {
         user = result.user;
       }
       
-      if (user.email.endsWith('@gmail.com')) {
+      if (user.email.endsWith('@kiet.edu')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName);
         setIsLoggedIn(true);
         setUserName(user.displayName.split(' ')[0]);
-        toast.success('Successfully verified Institutional ID!');
+        toast.success('Successfully verified KIET ID!');
       } else {
         await signOut(auth);
-        toast.error('Only @gmail.com emails are allowed. Access Denied.', { duration: 4000 });
+        toast.error('Only @kiet.edu emails are allowed. Access Denied.', { duration: 4000 });
       }
     } catch (error) {
       console.error("Login Failed:", error);
@@ -712,7 +712,7 @@ const Login = () => {
                   <p className="lp-welcome-sub">You're all set. Start a conversation and meet someone new.</p>
                   <div className="lp-verified-badge">
                     <ShieldCheck size={11} />
-                    Institutional ID Verified
+                    KIET ID Verified
                   </div>
                 </div>
                 <div className="lp-action-group">
@@ -731,7 +731,7 @@ const Login = () => {
                 </div>
                 <div>
                   <p className="lp-signin-heading">Verify your identity</p>
-                  <p className="lp-signin-sub">Sign in with your institutional Google account to access the platform.</p>
+                  <p className="lp-signin-sub">Sign in with your KIET Google account to access the platform.</p>
                 </div>
                 <div className="lp-sep">Secure sign-in</div>
                 <button
@@ -761,7 +761,7 @@ const Login = () => {
           {!isLoggedIn && (
             <div className="lp-footer">
               <ShieldCheck size={13} />
-              Protected by institutional verification
+              Protected by KIET verification
             </div>
           )}
 
