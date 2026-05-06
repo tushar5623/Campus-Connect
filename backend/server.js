@@ -27,7 +27,7 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174","https://campus-connect-murex.vercel.app"],
+    origin: ["http://localhost:5173", "http://localhost:5174","https://campus-connect-murex.vercel.app""http://localhost","https://localhost",  "capacitor://localhost"],
     methods: ["GET", "POST"],
     credentials: true
 }))
