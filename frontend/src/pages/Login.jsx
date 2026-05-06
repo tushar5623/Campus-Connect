@@ -16,11 +16,7 @@ const Login = () => {
 
   useEffect(() => {
     // 🟢 INITIALIZE NATIVE GOOGLE AUTH
-    GoogleAuth.initialize({
-      clientId: 'YAHAN_APNI_WEB_CLIENT_ID_PASTE_KARO', // <-- Apni ID yahan daalo
-      scopes: ['profile', 'email'],
-      grantOfflineAccess: true,
-    });
+    
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.email.endsWith('@kiet.edu')) {

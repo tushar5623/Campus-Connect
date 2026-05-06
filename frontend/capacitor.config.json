@@ -6,7 +6,7 @@
   "plugins": {
     "GoogleAuth": {
       "scopes": ["profile", "email"],
-      "serverClientId": "YAHAN_APNI_WEB_CLIENT_ID_PASTE_KARO",
+      "serverClientId": "640908739685-gpadvce0rn61vbjgfqbdh646ng0al4l2.apps.googleusercontent.com",
       "forceCodeForRefreshToken": true
     }
   }
