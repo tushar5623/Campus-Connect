@@ -1,13 +1,46 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* =========================================
+
+/* ========================================================
+   📱 NATIVE MOBILE SAFE AREA FIX (PROFESSIONAL UI)
+   ======================================================== */
+
+/* Ye poori app ko phone ki boundaries ke andar rakhega */
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+}
+
+#root {
+  /* Status bar aur navigation bar ke liye space */
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #0a0410; /* Radar background se match karta hua */
+}
+
+/* IMPORTANT: Agar tumhara Header/Navbar 'fixed' ya 'absolute' hai, 
+   toh niche wali classes mein apna sahi naam (like .navbar) daal dena.
+*/
+header, .nav-container, .top-bar {
+  padding-top: max(var(--sat), 20px) !important;
+}
+
+.bottom-chat-bar, .input-container {
+  padding-bottom: max(var(--sab), 15px) !important;
+}
+
+
+/* ========================================================
    2. EXACT REACT BITS RADAR BACKGROUND
-   ========================================= */
+   ======================================================== */
 .radar-container {
   position: absolute;
   inset: 0;
-  background-color: #0a0410; /* Ekdum deep dark purple/black background */
+  background-color: #0a0410; 
   overflow: hidden;
   z-index: 0;
 }
@@ -23,8 +56,8 @@
   background-image: repeating-radial-gradient(
     circle at 50% 50%,
     transparent 0,
-    transparent 50px, /* Ring ke beech ka gap */
-    rgba(217, 70, 239, 0.25) 51px /* Fuchsia/Purple glow wali lines */
+    transparent 50px, 
+    rgba(217, 70, 239, 0.25) 51px 
   );
 }
 
@@ -57,10 +90,10 @@
     transparent 0deg,
     transparent 280deg,
     rgba(217, 70, 239, 0.1) 330deg,
-    rgba(217, 70, 239, 0.85) 360deg /* Bright sweep edge */
+    rgba(217, 70, 239, 0.85) 360deg 
   );
   border-radius: 50%;
-  animation: radar-spin 3.5s linear infinite; /* Speed of rotation */
+  animation: radar-spin 3.5s linear infinite;
 }
 
 /* Center ka Glowing Dot */
