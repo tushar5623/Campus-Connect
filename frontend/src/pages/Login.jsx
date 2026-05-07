@@ -14,52 +14,62 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showRules, setShowRules] = useState(false); 
 
-  useEffect(() => {
-    
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith('')) {
-        localStorage.setItem('userEmail', user.email);
-        localStorage.setItem('userName', user.displayName); 
-        setIsLoggedIn(true);
-        setUserName(user.displayName.split(' ')[0]); 
-      }
-    });
-    return () => unsubscribe();
-  }, []); 
-
-  const handleLogin = async () => {
-    setIsLoading(true);
-    try {
-      let user;
-
-      if (Capacitor.isNativePlatform()) {
-        const googleUser = await GoogleAuth.signIn();
-        const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-        const result = await signInWithCredential(auth, credential);
-        user = result.user;
-      } else {
-        const result = await signInWithPopup(auth, provider);
-        user = result.user;
-      }
-      
-      if (user.email.endsWith('@kiet.edu')) {
-        localStorage.setItem('userEmail', user.email);
-        localStorage.setItem('userName', user.displayName);
-        setIsLoggedIn(true);
-        setUserName(user.displayName.split(' ')[0]);
-        toast.success('Successfully verified KIET ID!');
-      } else {
-        await signOut(auth);
-        toast.error('Only @kiet.edu emails are allowed. Access Denied.', { duration: 4000 });
-      }
-    } catch (error) {
-      console.error("Login Failed:", error);
-      toast.error(`Error: ${error.message || JSON.stringify(error)}`, { duration: 6000 });
-    } finally {
-      setIsLoading(false);
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // BUG FIX: '' ki jagah '@kiet.edu' daal diya
+    if (user && user.email.endsWith('@kiet.edu')) {
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userName', user.displayName); 
+      setIsLoggedIn(true);
+      setUserName(user.displayName.split(' ')[0]); 
+    } else {
+      // SAFETY NET: Agar normal user nahi hai toh sab clean rakho
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+      setIsLoggedIn(false);
+      setUserName('');
     }
-  };
+  });
+  return () => unsubscribe();
+}, []);
+
+ const handleLogin = async () => {
+  setIsLoading(true);
+  try {
+    let user;
+
+    if (Capacitor.isNativePlatform()) {
+      const googleUser = await GoogleAuth.signIn();
+      const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+      const result = await signInWithCredential(auth, credential);
+      user = result.user;
+    } else {
+      const result = await signInWithPopup(auth, provider);
+      user = result.user;
+    }
+    
+    if (user.email.endsWith('@kiet.edu')) {
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userName', user.displayName);
+      setIsLoggedIn(true);
+      setUserName(user.displayName.split(' ')[0]);
+      toast.success('Successfully verified KIET ID!');
+    } else {
+      await signOut(auth);
+      // BUG FIX: State aur Storage ko manually clear karna zaroori hai yahan
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+      setIsLoggedIn(false);
+      setUserName('');
+      toast.error('Only @kiet.edu emails are allowed. Access Denied.', { duration: 4000 });
+    }
+  } catch (error) {
+    console.error("Login Failed:", error);
+    toast.error(`Error: ${error.message || JSON.stringify(error)}`, { duration: 6000 });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleLogout = async () => {
     try {
