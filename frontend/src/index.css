@@ -2,114 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========================================================
-   📱 NATIVE MOBILE SAFE AREA FIX (PROFESSIONAL UI)
-   ======================================================== */
-
-/* Ye poori app ko phone ki boundaries ke andar rakhega */
 :root {
   --sat: env(safe-area-inset-top);
   --sab: env(safe-area-inset-bottom);
 }
 
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #020617;
+}
+
 #root {
-  /* Status bar aur navigation bar ke liye space */
-  padding-top: var(--sat);
-  padding-bottom: var(--sab);
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background-color: #0a0410; /* Radar background se match karta hua */
+  width: 100%;
 }
 
-/* IMPORTANT: Agar tumhara Header/Navbar 'fixed' ya 'absolute' hai, 
-   toh niche wali classes mein apna sahi naam (like .navbar) daal dena.
-*/
-header, .nav-container, .top-bar {
-  padding-top: max(var(--sat), 20px) !important;
+header, .top-bar-class {
+  padding-top: var(--sat) !important;
+  min-height: calc(56px + var(--sat)); 
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 50;
 }
 
-.bottom-chat-bar, .input-container {
+main, .content-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+footer, .chat-input-container {
   padding-bottom: max(var(--sab), 15px) !important;
+  margin-bottom: 0 !important;
+  flex-shrink: 0;
+  z-index: 50;
 }
 
 
-/* ========================================================
-   2. EXACT REACT BITS RADAR BACKGROUND
-   ======================================================== */
-.radar-container {
-  position: absolute;
-  inset: 0;
-  background-color: #0a0410; 
-  overflow: hidden;
-  z-index: 0;
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-/* Gol Circles (Concentric Rings) */
-.radar-rings {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200vw;
-  height: 200vw;
-  transform: translate(-50%, -50%);
-  background-image: repeating-radial-gradient(
-    circle at 50% 50%,
-    transparent 0,
-    transparent 50px, 
-    rgba(217, 70, 239, 0.25) 51px 
-  );
+.animate-scan {
+  animation: scan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* Seedhi Lines (Crosshairs) */
-.radar-lines {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200vw;
-  height: 200vw;
-  transform: translate(-50%, -50%);
-  background-image: 
-    linear-gradient(0deg, transparent 49.9%, rgba(217, 70, 239, 0.3) 49.9%, rgba(217, 70, 239, 0.3) 50.1%, transparent 50.1%),
-    linear-gradient(90deg, transparent 49.9%, rgba(217, 70, 239, 0.3) 49.9%, rgba(217, 70, 239, 0.3) 50.1%, transparent 50.1%),
-    linear-gradient(45deg, transparent 49.9%, rgba(217, 70, 239, 0.2) 49.9%, rgba(217, 70, 239, 0.2) 50.1%, transparent 50.1%),
-    linear-gradient(-45deg, transparent 49.9%, rgba(217, 70, 239, 0.2) 49.9%, rgba(217, 70, 239, 0.2) 50.1%, transparent 50.1%);
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-/* Ghoomne wali Radar Beam */
-.radar-sweep {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150vw;
-  height: 150vw;
-  margin-top: -75vw;
-  margin-left: -75vw;
-  background: conic-gradient(
-    from 0deg at 50% 50%,
-    transparent 0deg,
-    transparent 280deg,
-    rgba(217, 70, 239, 0.1) 330deg,
-    rgba(217, 70, 239, 0.85) 360deg 
-  );
-  border-radius: 50%;
-  animation: radar-spin 3.5s linear infinite;
+.animate-cursor {
+  animation: blink 0.8s step-end infinite;
 }
 
-/* Center ka Glowing Dot */
-.radar-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 15px 5px rgba(217, 70, 239, 0.9);
+.fade-in {
+  animation: fadeIn 0.8s ease-in forwards;
 }
 
-@keyframes radar-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; 
 }

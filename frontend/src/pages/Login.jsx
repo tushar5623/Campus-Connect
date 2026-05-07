@@ -15,7 +15,6 @@ const Login = () => {
   const [showRules, setShowRules] = useState(false); 
 
   useEffect(() => {
-    // 🟢 INITIALIZE NATIVE GOOGLE AUTH
     
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -34,15 +33,12 @@ const Login = () => {
     try {
       let user;
 
-      // 🧠 SMART CHECK: Website hai ya Mobile App?
       if (Capacitor.isNativePlatform()) {
-        // 📱 MOBILE APP NATIVE LOGIN
         const googleUser = await GoogleAuth.signIn();
         const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
         const result = await signInWithCredential(auth, credential);
         user = result.user;
       } else {
-        // 💻 WEBSITE POPUP LOGIN
         const result = await signInWithPopup(auth, provider);
         user = result.user;
       }
@@ -59,7 +55,6 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login Failed:", error);
-      // Asli error screen par dikhane ke liye:
       toast.error(`Error: ${error.message || JSON.stringify(error)}`, { duration: 6000 });
     } finally {
       setIsLoading(false);
@@ -82,7 +77,6 @@ const Login = () => {
     }
   };
 
-  // ... (Baaki poora UI/return statement bilkul waise hi rahega jaise tumhare pichle code me tha)
   return (
     <>
       <style>{`
@@ -90,23 +84,22 @@ const Login = () => {
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ── Root ─────────────────────────────────────────── */
         .lp-root {
           min-height: 100dvh;
+          height: 100%
           font-family: 'Outfit', sans-serif;
           background: #f8f7f4;
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: center;  
           justify-content: center;
           padding: 1.5rem 1rem 3rem;
           position: relative;
-          overflow: hidden;
+          overflow-y: auto;
         }
 
-        /* Decorative blobs */
         .lp-blob {
-          position: absolute;
+          position: fixed;
           border-radius: 50%;
           filter: blur(72px);
           pointer-events: none;
@@ -128,7 +121,6 @@ const Login = () => {
           background: radial-gradient(circle, rgba(253,186,116,0.2) 0%, transparent 70%);
         }
 
-        /* Subtle dot-grid texture */
         .lp-root::before {
           content: '';
           position: absolute;
@@ -139,7 +131,6 @@ const Login = () => {
           z-index: 0;
         }
 
-        /* ── Page wrapper ─────────────────────────────────── */
         .lp-wrap {
           width: 100%;
           max-width: 480px;
@@ -150,6 +141,7 @@ const Login = () => {
           position: relative;
           z-index: 1;
           transition: opacity 0.3s, filter 0.3s;
+          margin: auto;
         }
         .lp-wrap.blurred {
           opacity: 0.18;
@@ -157,7 +149,6 @@ const Login = () => {
           pointer-events: none;
         }
 
-        /* ── Top chip ─────────────────────────────────────── */
         .lp-chip {
           display: inline-flex;
           align-items: center;
@@ -185,7 +176,6 @@ const Login = () => {
           50%       { box-shadow: 0 0 0 5px rgba(34,197,94,0.12); }
         }
 
-        /* ── Hero heading ─────────────────────────────────── */
         .lp-hero {
           text-align: center;
         }
@@ -202,7 +192,6 @@ const Login = () => {
           display: inline-block;
         }
 
-        /* ── Shimmer sweep on title ───────────────────────── */
         .lp-title-shimmer {
           position: relative;
           display: inline-block;
@@ -237,7 +226,6 @@ const Login = () => {
           color: #4f46e5;
           position: relative;
         }
-        /* Underline squiggle under "Connect" */
         .lp-title-accent::after {
           content: '';
           position: absolute;
@@ -262,7 +250,6 @@ const Login = () => {
           margin: 1.1rem auto 0;
         }
 
-        /* ── Stats strip ──────────────────────────────────── */
         .lp-stats {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -312,7 +299,6 @@ const Login = () => {
           text-transform: uppercase;
         }
 
-        /* ── Main card ────────────────────────────────────── */
         .lp-card {
           width: 100%;
           background: #ffffff;
@@ -325,7 +311,6 @@ const Login = () => {
             0 12px 36px rgba(0,0,0,0.07);
         }
 
-        /* ── Signed-out state ─────────────────────────────── */
         .lp-signin {
           display: flex;
           flex-direction: column;
@@ -376,7 +361,6 @@ const Login = () => {
           background: #ece9e3;
         }
 
-        /* Google button */
         .lp-btn-google {
           width: 100%;
           display: flex;
@@ -412,7 +396,6 @@ const Login = () => {
         }
         .g-icon { width: 18px; height: 18px; flex-shrink: 0; }
 
-        /* Enter button */
         .lp-btn-enter {
           width: 100%;
           display: flex;
@@ -446,7 +429,6 @@ const Login = () => {
         }
         .lp-btn-enter:active { transform: translateY(0); }
 
-        /* Logout button */
         .lp-btn-logout {
           width: 100%;
           display: flex;
@@ -466,7 +448,6 @@ const Login = () => {
         }
         .lp-btn-logout:hover { background: #f3f2ef; color: #3d3a35; }
 
-        /* ── Welcome / logged-in state ────────────────────── */
         .lp-welcome {
           display: flex;
           flex-direction: column;
@@ -523,7 +504,6 @@ const Login = () => {
           margin-top: 4px;
         }
 
-        /* ── Footer ───────────────────────────────────────── */
         .lp-footer {
           display: flex;
           align-items: center;
@@ -534,7 +514,6 @@ const Login = () => {
         }
         .lp-footer svg { color: #22c55e; }
 
-        /* ── Modal ────────────────────────────────────────── */
         .lp-overlay {
           position: fixed;
           inset: 0;
@@ -642,7 +621,6 @@ const Login = () => {
           box-shadow: 0 6px 20px rgba(79,70,229,0.38);
         }
 
-        /* ── Mobile tweaks ────────────────────────────────── */
         @media (max-width: 480px) {
           .lp-card { padding: 1.75rem 1.25rem; border-radius: 22px; }
           .lp-modal { padding: 1.5rem 1.25rem; border-radius: 20px; }
@@ -651,7 +629,6 @@ const Login = () => {
         }
       `}</style>
 
-      {/* Decorative blobs */}
       <div className="lp-root">
         <div className="lp-blob lp-blob-1" />
         <div className="lp-blob lp-blob-2" />
@@ -659,13 +636,11 @@ const Login = () => {
 
         <div className={`lp-wrap ${showRules ? 'blurred' : ''}`}>
 
-          {/* Live chip */}
           <div className="lp-chip">
             <span className="lp-chip-dot" />
             Campus-wide · Text Chat
           </div>
 
-          {/* Hero heading */}
           <div className="lp-hero">
             <h1 className="lp-title">
               <span className="lp-title-shimmer">
@@ -677,7 +652,6 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Stats strip */}
           <div className="lp-stats">
             <div className="lp-stat">
               <div className="lp-stat-icon indigo"><MessageSquare size={15} /></div>
@@ -696,7 +670,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Main card */}
+          
           <div className="lp-card">
             {isLoggedIn ? (
               <div className="lp-welcome">
@@ -753,7 +727,6 @@ const Login = () => {
             )}
           </div>
 
-          {/* Footer */}
           {!isLoggedIn && (
             <div className="lp-footer">
               <ShieldCheck size={13} />
@@ -763,7 +736,6 @@ const Login = () => {
 
         </div>
 
-        {/* Community Guidelines Modal */}
         {showRules && (
           <div className="lp-overlay">
             <div className="lp-modal">

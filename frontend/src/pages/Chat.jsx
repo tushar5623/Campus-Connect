@@ -5,7 +5,7 @@ import { Send, LogOut, AlertTriangle, Search, UserCheck, Sun, Moon,ArrowLeft } f
 import { useEffect, useState, useRef, useContext } from 'react';
 import socket from '../socket'; 
 import { ThemeContext } from '../ThemeContext'; 
-import { useNavigate } from 'react-router-dom'; // 🟢 YE LINE ADD KARO
+import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -206,13 +206,13 @@ const Chat = () => {
   }
 
   return (
-    // FIX 1: Root container background colors for Light/Dark
-    <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-500">
-      
-      {/* Top Navigation Bar */}
-     {/* Top Navigation Bar */}
-      <header className="flex justify-between items-center px-4 md:px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500 shadow-sm dark:shadow-none z-10">
-        <h1 className="text-xl md:text-2xl font-bold text-cyan-600 dark:text-cyan-400">Campus Connect</h1>
+
+<div className="flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-500" style={{height: '100dvh'}}>      
+    
+
+<header className="flex justify-between items-center px-4 md:px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500 shadow-sm z-10 flex-shrink-0"
+  style={{paddingTop: 'calc(env(safe-area-inset-top) + 16px)', paddingBottom: '16px'}}>
+            <h1 className="text-xl md:text-2xl font-bold text-cyan-600 dark:text-cyan-400">Campus Connect</h1>
         
         <div className="flex items-center gap-3 md:gap-4">
           <button 
@@ -226,7 +226,6 @@ const Chat = () => {
             Welcome, <strong className="text-slate-900 dark:text-white">{userName}</strong>
           </span>
           
-          {/* 🟢 FIX 1: Logout button sirf tab dikhega jab user chat nahi kar raha ho */}
           {appState !== 'chatting' && (
             <button 
               onClick={handleFullLogout} 
@@ -238,9 +237,7 @@ const Chat = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 flex flex-col pb-24 md:pb-4 transition-colors duration-500">
-          
-          {/* STATE 1: IDLE */}
+<main className="flex-1 overflow-y-auto p-4 flex flex-col transition-colors duration-500" style={{paddingBottom: appState === 'chatting' ? '80px' : '16px'}}>          
           {appState === 'idle' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 shadow-md border border-slate-200 dark:border-slate-700 transition-colors">
@@ -272,7 +269,6 @@ const Chat = () => {
             </div>
           )}
 
-          {/* STATE 2: SEARCHING */}
           {appState === 'searching' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Search size={48} className="text-cyan-600 dark:text-cyan-400 animate-pulse mb-6 transition-colors" />
@@ -288,11 +284,11 @@ const Chat = () => {
             </div>
           )}
 
-          {/* STATE 3: CHATTING */}
+          
           {appState === 'chatting' && (
             <div className="flex-1 space-y-4 flex flex-col relative">
                
-               {/* Fixed Header Options in Chat */}
+           
                <div className="sticky top-0 z-10 flex justify-between items-center bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md py-2 border-b border-slate-200 dark:border-slate-800 mb-4 transition-colors">
                   <span className="bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300 text-xs px-4 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-800/50 transition-colors font-medium">
                     Connected with a stranger 👋
@@ -351,10 +347,11 @@ const Chat = () => {
 
       </main>
 
-      {/* FIX 2: Footer / Input Box Colors */}
+      
       {appState === 'chatting' && (
-        <footer className="fixed bottom-0 left-0 right-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe md:relative transition-colors duration-500 z-20">
-          <form onSubmit={sendMessage} className="max-w-5xl mx-auto flex gap-2">
+<footer className="flex-shrink-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors duration-500 z-20"
+  style={{paddingBottom: 'max(env(safe-area-inset-bottom), 12px)'}}>
+              <form onSubmit={sendMessage} className="max-w-5xl mx-auto flex gap-2">
             <input
               type="text"
               value={inputMessage}
@@ -373,7 +370,8 @@ const Chat = () => {
         </footer>
       )}
 
-      {/* FIX 3: REPORT MODAL */}
+      
+      
       {isReportModalOpen && (
         <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors duration-500">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 w-full max-w-md shadow-2xl transition-colors duration-500">

@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect } from 'react';
 
-// 1. Context banaya
+
 export const ThemeContext = createContext();
 
-// 2. Provider banaya jo bacchon (components) ko theme dega
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
