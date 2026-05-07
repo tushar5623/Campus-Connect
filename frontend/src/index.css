@@ -23,7 +23,8 @@ html, body {
 }
 
 header, .top-bar-class {
-  padding-top: var(--sat) !important;
+  /* Bas is ek line mein max() function lagana hai */
+  padding-top: max(var(--sat), 16px) !important; 
   min-height: calc(56px + var(--sat)); 
   display: flex;
   align-items: center;
