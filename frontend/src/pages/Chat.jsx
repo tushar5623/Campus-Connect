@@ -207,11 +207,9 @@ const Chat = () => {
 
   return (
 
-<div className="flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-500" style={{height: '100dvh'}}>      
-    
+<div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-500">    
 
-<header className="flex justify-between items-center px-4 md:px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500 shadow-sm z-10 flex-shrink-0"
-  style={{paddingTop: 'calc(env(safe-area-inset-top) + 16px)', paddingBottom: '16px'}}>
+<header className="flex justify-between items-center px-4 md:px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500 shadow-sm z-10 flex-shrink-0">
             <h1 className="text-xl md:text-2xl font-bold text-cyan-600 dark:text-cyan-400">Campus Connect</h1>
         
         <div className="flex items-center gap-3 md:gap-4">
@@ -237,8 +235,7 @@ const Chat = () => {
         </div>
       </header>
 
-<main className="flex-1 overflow-y-auto p-4 flex flex-col transition-colors duration-500" style={{paddingBottom: appState === 'chatting' ? '80px' : '16px'}}>          
-          {appState === 'idle' && (
+<main className="flex-1 overflow-y-auto p-4 flex flex-col transition-colors duration-500 relative">          {appState === 'idle' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 shadow-md border border-slate-200 dark:border-slate-700 transition-colors">
                 <UserCheck size={48} className="text-cyan-600 dark:text-cyan-400 transition-colors" />
@@ -349,8 +346,7 @@ const Chat = () => {
 
       
       {appState === 'chatting' && (
-<footer className="flex-shrink-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors duration-500 z-20"
-  style={{paddingBottom: 'max(env(safe-area-inset-bottom), 12px)'}}>
+<footer className="flex-shrink-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors duration-500 z-20">
               <form onSubmit={sendMessage} className="max-w-5xl mx-auto flex gap-2">
             <input
               type="text"
@@ -371,7 +367,7 @@ const Chat = () => {
       )}
 
       
-      
+
       {isReportModalOpen && (
         <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors duration-500">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 w-full max-w-md shadow-2xl transition-colors duration-500">
