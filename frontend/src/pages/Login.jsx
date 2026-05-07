@@ -92,7 +92,7 @@ const Login = () => {
           display: flex;
           flex-direction: column;
           align-items: center;  
-          justify-content: center;
+          
           padding: 1.5rem 1rem 3rem;
           position: relative;
           overflow-y: auto;
