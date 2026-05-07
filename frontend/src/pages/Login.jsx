@@ -18,7 +18,7 @@ const Login = () => {
     
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith('@kiet.edu')) {
+      if (user && user.email.endsWith('@gmail.com')) {
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userName', user.displayName); 
         setIsLoggedIn(true);

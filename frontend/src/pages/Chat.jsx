@@ -235,7 +235,8 @@ const Chat = () => {
         </div>
       </header>
 
-<main className="flex-1 overflow-y-auto p-4 flex flex-col transition-colors duration-500 relative">          {appState === 'idle' && (
+<main className="flex-1 overflow-y-auto px-4 pb-4 pt-0 flex flex-col transition-colors duration-500 relative">
+          {appState === 'idle' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 shadow-md border border-slate-200 dark:border-slate-700 transition-colors">
                 <UserCheck size={48} className="text-cyan-600 dark:text-cyan-400 transition-colors" />
@@ -286,8 +287,8 @@ const Chat = () => {
             <div className="flex-1 space-y-4 flex flex-col relative">
                
            
-               <div className="sticky top-0 z-10 flex justify-between items-center bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md py-2 border-b border-slate-200 dark:border-slate-800 mb-4 transition-colors">
-                  <span className="bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300 text-xs px-4 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-800/50 transition-colors font-medium">
+                      <div className="sticky top-0 z-30 -mx-4 px-4 py-3 flex justify-between items-center bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 mb-4 transition-colors">
+                    <span className="bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300 text-xs px-4 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-800/50 transition-colors font-medium">
                     Connected with a stranger 👋
                   </span>
                   <div className="flex gap-2">
