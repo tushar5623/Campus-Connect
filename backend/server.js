@@ -1,4 +1,4 @@
-import 'dotenv/config'; // 👈 Sirf ye ek line kaafi hai poore app ke liye!
+import 'dotenv/config'; // 👈 Sirf ye ek line kaafi hai poore app ke liye
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';

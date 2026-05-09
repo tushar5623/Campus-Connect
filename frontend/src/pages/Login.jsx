@@ -16,8 +16,8 @@ const Login = () => {
 
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
-    // BUG FIX: '' ki jagah '@kiet.edu' daal diya
-    if (user && user.email.endsWith('@kiet.edu')) {
+    
+    if (user && user.email.endsWith('@poornima.edu.in')) {
       localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userName', user.displayName); 
       setIsLoggedIn(true);
@@ -48,12 +48,12 @@ useEffect(() => {
       user = result.user;
     }
     
-    if (user.email.endsWith('@kiet.edu')) {
+    if (user.email.endsWith('@poornima.edu.in')) {
       localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userName', user.displayName);
       setIsLoggedIn(true);
       setUserName(user.displayName.split(' ')[0]);
-      toast.success('Successfully verified KIET ID!');
+      toast.success('Successfully verified college ID!');
     } else {
       await signOut(auth);
       // BUG FIX: State aur Storage ko manually clear karna zaroori hai yahan
@@ -61,7 +61,7 @@ useEffect(() => {
       localStorage.removeItem('userName');
       setIsLoggedIn(false);
       setUserName('');
-      toast.error('Only @kiet.edu emails are allowed. Access Denied.', { duration: 4000 });
+      toast.error('Only @poornima.edu.in emails are allowed. Access Denied.', { duration: 4000 });
     }
   } catch (error) {
     console.error("Login Failed:", error);
@@ -692,7 +692,7 @@ useEffect(() => {
                   <p className="lp-welcome-sub">You're all set. Start a conversation and meet someone new.</p>
                   <div className="lp-verified-badge">
                     <ShieldCheck size={11} />
-                    KIET ID Verified
+                    College ID Verified
                   </div>
                 </div>
                 <div className="lp-action-group">
@@ -711,7 +711,7 @@ useEffect(() => {
                 </div>
                 <div>
                   <p className="lp-signin-heading">Verify your identity</p>
-                  <p className="lp-signin-sub">Sign in with your KIET Google account to access the platform.</p>
+                  <p className="lp-signin-sub">Sign in with your College Google account to access the platform.</p>
                 </div>
                 <div className="lp-sep">Secure sign-in</div>
                 <button
@@ -740,7 +740,7 @@ useEffect(() => {
           {!isLoggedIn && (
             <div className="lp-footer">
               <ShieldCheck size={13} />
-              Protected by KIET verification
+              Protected by College verification
             </div>
           )}
 
