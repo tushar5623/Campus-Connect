@@ -16,6 +16,10 @@ const Login = () => {
   const [showRules, setShowRules] = useState(false); 
 
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      GoogleAuth.initialize();
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.email.endsWith('@gmail.com')) {
         localStorage.setItem('userEmail', user.email);
