@@ -8,7 +8,7 @@ export const DashboardView = ({
   onNavigateWelcome,
 }) => {
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center py-4">
+    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center py-6 pb-20 sm:pb-8">
       
       {/* Hero Section */}
       <div className="text-center space-y-4 mb-8">

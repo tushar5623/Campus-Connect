@@ -16,6 +16,7 @@ function App() {
         <Router>
           <Toaster 
             position="top-center" 
+            containerStyle={{ top: 20 }}
             toastOptions={{
               style: {
                 background: '#0f172a',

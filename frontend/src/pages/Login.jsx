@@ -90,7 +90,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-start bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-8 sm:py-12 overflow-y-auto transition-colors duration-300 font-sans">
+    <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-start bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-8 pb-20 sm:pb-12 overflow-y-auto transition-colors duration-300 font-sans">
       
       {/* Background Ambient Glows */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">

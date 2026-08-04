@@ -15,19 +15,19 @@ export const Navbar = ({ onlineUsers, userName, appState, onFullLogout, onNaviga
             <MessageCircle size={20} />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
               Campus Connect
             </h1>
-            <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="hidden sm:block text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
               Verified Student Platform
             </span>
           </div>
         </div>
 
         {/* Right Header Items */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Live Online Badge */}
-          <div className="flex items-center gap-2 rounded-full border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+          <div className="flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-400">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
