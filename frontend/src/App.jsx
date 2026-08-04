@@ -18,9 +18,14 @@ function App() {
             position="top-center" 
             toastOptions={{
               style: {
-                background: '#1e293b', 
-                color: '#fff',
-                border: '1px solid #334155', 
+                background: '#0f172a',
+                color: '#f8fafc',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '16px',
+                padding: '12px 18px',
+                fontSize: '14px',
+                fontWeight: '600',
+                boxShadow: '0 10px 30px -5px rgba(15, 23, 42, 0.3)',
               },
             }}
           />
