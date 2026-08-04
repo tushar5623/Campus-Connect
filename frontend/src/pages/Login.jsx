@@ -90,7 +90,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative h-full min-h-[100dvh] w-full flex flex-col items-center justify-start sm:justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 pt-10 pb-12 overflow-y-auto transition-colors duration-300 font-sans">
+    <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-start bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-8 sm:py-12 overflow-y-auto transition-colors duration-300 font-sans">
       
       {/* Background Ambient Glows */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
@@ -99,7 +99,7 @@ const Login = () => {
       </div>
 
       {/* Main Container */}
-      <div className={`relative z-10 w-full max-w-md my-auto flex flex-col items-center gap-5 sm:gap-6 pt-2 transition-all duration-300 ${showRules ? 'blur-md pointer-events-none opacity-40' : ''}`}>
+      <div className={`relative z-10 w-full max-w-md flex flex-col items-center gap-5 sm:gap-6 py-2 transition-all duration-300 ${showRules ? 'blur-md pointer-events-none opacity-40' : ''}`}>
         
         {/* Campus Status Chip */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 shadow-sm text-xs font-semibold text-slate-700 dark:text-slate-300 backdrop-blur-md">
