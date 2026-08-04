@@ -7,10 +7,11 @@ const getBackendUrl = () => {
   }
   
   if (Capacitor.isNativePlatform()) {
-    // Android Emulator host loopback address is 10.0.2.2
-    return 'http://10.0.2.2:5000';
+    // Production AWS server domain for native Android builds
+    return 'https://api-campusconnect.me';
   }
 
+  // Local development fallback
   return 'http://localhost:5000';
 };
 
