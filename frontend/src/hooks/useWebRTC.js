@@ -5,7 +5,13 @@ const rtcConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    { urls: 'stun:stun.services.mozilla.com' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
   ],
+  iceCandidatePoolSize: 10,
 };
 
 export const useWebRTC = (appState, roomId) => {
@@ -136,7 +142,11 @@ export const useWebRTC = (appState, roomId) => {
     const candidates = pendingIceCandidatesRef.current;
     pendingIceCandidatesRef.current = [];
     for (const candidate of candidates) {
-      await peer.addIceCandidate(new RTCIceCandidate(candidate));
+      try {
+        await peer.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.warn('ICE candidate addition failed:', err);
+      }
     }
   };
 
@@ -167,7 +177,11 @@ export const useWebRTC = (appState, roomId) => {
       return;
     }
 
-    await peer.addIceCandidate(new RTCIceCandidate(candidate));
+    try {
+      await peer.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch (err) {
+      console.warn('Direct ICE candidate addition failed:', err);
+    }
   };
 
   const toggleMic = () => {
