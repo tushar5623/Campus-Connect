@@ -11,6 +11,11 @@ const getBackendUrl = () => {
     return 'https://api-campusconnect.me';
   }
 
+  // Production web fallback (e.g. Vercel deployment)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://api-campusconnect.me';
+  }
+
   // Local development fallback
   return 'http://localhost:5000';
 };
