@@ -302,7 +302,7 @@ npm run dev
 
 ## Security Notes
 
-- **Identity Verification**: Restricts access to authorized email domains (`@gmail.com` / `@kiet.edu`).
+- **Identity Verification**: Restricts access to authorized email domains (`@kiet.edu`).
 - **Enforced Account Suspension**: Blocked accounts are immediately kicked out and prevented from registering socket sessions.
 - **CORS Protection**: Whitelisted origin array enforcing strict CORS policies across HTTP and WebSockets.
 - **Credential Protection**: Environment keys (`MONGO_URI`) are loaded via Dotenv and kept out of version control.
