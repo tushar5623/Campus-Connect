@@ -43,6 +43,7 @@ export const useChatSocket = (webRTC) => {
     };
 
     const handleVideoMatched = async (data) => {
+      console.log('📹 [VIDEO] video_matched received from server:', data);
       try {
         setActiveMode('video');
         setRoomId(data.roomId);
@@ -50,19 +51,25 @@ export const useChatSocket = (webRTC) => {
         setMessages([]);
         webRTC.setVideoError('');
 
+        console.log('📹 [VIDEO] Acquiring local stream...');
         await webRTC.ensureLocalStream();
+        console.log('📹 [VIDEO] Local stream ready. Creating peer connection...');
         const peer = webRTC.createPeerConnection(data.roomId);
 
         if (data.initiator) {
+          console.log('📹 [VIDEO] I am initiator. Creating offer...');
           const offer = await peer.createOffer({
             offerToReceiveAudio: true,
             offerToReceiveVideo: true,
           });
           await peer.setLocalDescription(offer);
+          console.log('📹 [VIDEO] Offer created & set. Emitting video_offer...');
           socket.emit('video_offer', { roomId: data.roomId, offer });
+        } else {
+          console.log('📹 [VIDEO] I am receiver. Waiting for offer from initiator...');
         }
       } catch (error) {
-        console.error('Video match setup failed:', error);
+        console.error('📹 [VIDEO] ❌ Video match setup failed:', error);
         webRTC.setVideoError(error.message || 'Unable to start video chat.');
         setAppState('idle');
         setRoomId(null);
@@ -107,6 +114,7 @@ export const useChatSocket = (webRTC) => {
       setAppState('searching');
     });
     socket.on('video_waiting', () => {
+      console.log('📹 [VIDEO] Server says: video_waiting — I am in the queue');
       setActiveMode('video');
       setAppState('searching');
     });
@@ -169,24 +177,34 @@ export const useChatSocket = (webRTC) => {
   };
 
   const startVideoMatching = async () => {
-    // Bug #5 Fix: Mobile browsers fire both touchstart and click events for a single tap.
-    // Without this guard, two concurrent getUserMedia calls race and can corrupt stream state.
+    // Guard against double-invocation (mobile fires touchstart + click)
     if (isStartingVideoRef.current) return;
     isStartingVideoRef.current = true;
     try {
       setActiveMode('video');
       webRTC.setVideoError('');
       setAppState('searching');
-      await webRTC.ensureLocalStream();
+
+      // KEY FIX: Emit find_video_match to server IMMEDIATELY so both users enter
+      // the queue at the same time. Previously this was gated behind getUserMedia
+      // which can take 3-5 seconds on mobile (permission dialog), meaning the server
+      // queue never had 2 live users simultaneously — so they'd never match.
+      console.log('📹 [VIDEO] Emitting find_video_match to server immediately...');
       socket.emit('find_video_match');
+
+      // Acquire camera in parallel — it will be ready by the time video_matched fires
+      console.log('📹 [VIDEO] Acquiring camera in background...');
+      await webRTC.ensureLocalStream();
+      console.log('📹 [VIDEO] Camera acquired successfully.');
     } catch (error) {
-      console.error('Camera permission failed:', error);
+      console.error('📹 [VIDEO] ❌ Camera acquisition failed:', error);
+      // Camera failed — cancel the search we already started
+      socket.emit('cancel_search');
       setAppState('idle');
       webRTC.setVideoError(error.message || 'Please allow camera and microphone access to start video chat.');
       toast.error('Please allow camera and microphone access.');
       webRTC.cleanupVideoCall();
     } finally {
-      // Always release the guard so the user can retry if something went wrong
       isStartingVideoRef.current = false;
     }
   };

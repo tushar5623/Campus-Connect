@@ -27,10 +27,16 @@ export const registerMatchHandlers = (io, socket) => {
 
   // Video Match
   socket.on(SOCKET_EVENTS.FIND_VIDEO_MATCH, () => {
+    console.log(`\n📹 [VIDEO] find_video_match received from: ${socket.id}`);
+    console.log(`📹 [VIDEO] Video queue BEFORE match: [${matchService.waitingVideoUsers.map(u => u.id).join(', ')}]`);
+
     const result = matchService.findVideoMatch(socket);
+
+    console.log(`📹 [VIDEO] Video queue AFTER match: [${matchService.waitingVideoUsers.map(u => u.id).join(', ')}]`);
 
     if (result) {
       const { partner, roomId } = result;
+      console.log(`📹 [VIDEO] ✅ Match found! Room: ${roomId} | Partner: ${partner.id}`);
 
       partner.emit(SOCKET_EVENTS.VIDEO_MATCHED, {
         roomId,
@@ -43,8 +49,9 @@ export const registerMatchHandlers = (io, socket) => {
         message: SYSTEM_MESSAGES.MATCHED_VIDEO
       });
 
-      console.log(`📹 Video match created! Room: ${roomId}`);
+      console.log(`📹 [VIDEO] video_matched emitted to both parties.`);
     } else {
+      console.log(`📹 [VIDEO] No match yet. Sending video_waiting to ${socket.id}.`);
       socket.emit(SOCKET_EVENTS.VIDEO_WAITING, SYSTEM_MESSAGES.WAITING_VIDEO);
     }
   });
