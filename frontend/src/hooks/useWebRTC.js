@@ -1,8 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import socket from '../socket';
 
-// Bug #4 Fix: Added TURN servers so WebRTC works on carrier/mobile NAT (4G/5G CGNAT/symmetric NAT)
-// Without TURN, peer connections fail on most mobile networks.
 const rtcConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -12,7 +10,7 @@ const rtcConfig = {
     { urls: 'stun:stun4.l.google.com:19302' },
     { urls: 'stun:stun.services.mozilla.com' },
     { urls: 'stun:global.stun.twilio.com:3478' },
-    // Free TURN relay servers — required for symmetric NAT (most mobile carriers)
+    // TURN relay servers — required for mobile carrier NAT (4G/5G CGNAT/symmetric NAT)
     {
       urls: 'turn:openrelay.metered.ca:80',
       username: 'openrelayproject',
@@ -45,21 +43,28 @@ export const useWebRTC = (appState, roomId) => {
   const peerConnectionRef = useRef(null);
   const pendingIceCandidatesRef = useRef([]);
 
-  // Bug #3 Fix: Poll via rAF until the video DOM ref is mounted, then set srcObject.
-  // This eliminates the race condition where attach*Stream() is called before the
-  // VideoChatRoom component mounts and populates the ref.
-  const attachStreamWhenReady = (videoRefHolder, stream, retries = 30) => {
+  // Promise cache — prevents double getUserMedia when startVideoMatching and
+  // handleVideoMatched both call ensureLocalStream() concurrently.
+  // Without this, two getUserMedia calls race and localStreamRef.current is null
+  // when createPeerConnection() runs → no tracks added → both screens black.
+  const streamAcquisitionPromiseRef = useRef(null);
+
+  // ─── Stream Attachment ───────────────────────────────────────────────────────
+
+  // Retry via rAF until the video DOM ref is mounted, then set srcObject.
+  // Handles the race where attach*Stream() is called before VideoChatRoom mounts.
+  const attachStreamWhenReady = (videoRefHolder, stream, retries = 40) => {
     if (!stream) return;
     const attempt = (remaining) => {
       if (videoRefHolder.current) {
         videoRefHolder.current.srcObject = stream;
         videoRefHolder.current
           .play()
-          .catch((err) => console.warn('Video play() rejected:', err));
+          .catch((err) => console.warn('[WebRTC] video.play() rejected:', err));
         return;
       }
       if (remaining <= 0) {
-        console.warn('attachStreamWhenReady: ref never mounted after max retries.');
+        console.warn('[WebRTC] attachStreamWhenReady: ref never mounted.');
         return;
       }
       requestAnimationFrame(() => attempt(remaining - 1));
@@ -71,11 +76,10 @@ export const useWebRTC = (appState, roomId) => {
     if (!stream) return;
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
-      localVideoRef.current.play?.().catch((err) =>
-        console.warn('Local video play() rejected:', err)
+      localVideoRef.current.play?.().catch((e) =>
+        console.warn('[WebRTC] local video play() rejected:', e)
       );
     } else {
-      // Ref not yet mounted — wait for it
       attachStreamWhenReady(localVideoRef, stream);
     }
   };
@@ -84,28 +88,36 @@ export const useWebRTC = (appState, roomId) => {
     if (!stream) return;
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = stream;
-      remoteVideoRef.current.play?.().catch((err) =>
-        console.warn('Remote video play() rejected:', err)
+      remoteVideoRef.current.play?.().catch((e) =>
+        console.warn('[WebRTC] remote video play() rejected:', e)
       );
     } else {
-      // Ref not yet mounted — wait for it
       attachStreamWhenReady(remoteVideoRef, stream);
     }
   };
 
-  // Bug #1 Fix: Progressive constraint fallback for getUserMedia.
-  // Many phone cameras (especially front-facing on Android) reject the specific
-  // resolution constraints with an OverconstrainedError, causing a silent failure.
-  // We try HD → SD → bare { video: true } to maximise device compatibility.
+  // ─── Camera Acquisition ──────────────────────────────────────────────────────
+
   const ensureLocalStream = async () => {
+    // Stream already acquired and alive — reuse it
     if (localStreamRef.current) {
       attachLocalStream(localStreamRef.current);
       return localStreamRef.current;
     }
 
+    // *** KEY FIX: Promise cache ***
+    // If another caller (e.g. handleVideoMatched) is already waiting for getUserMedia,
+    // return the SAME promise instead of spawning a second getUserMedia call.
+    // This prevents the race where localStreamRef.current is null when
+    // createPeerConnection() runs and no tracks get added to the peer.
+    if (streamAcquisitionPromiseRef.current) {
+      console.log('[WebRTC] Camera acquisition already in progress — sharing promise.');
+      return streamAcquisitionPromiseRef.current;
+    }
+
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error(
-        'Camera and microphone are not supported in this browser or context. Make sure you are on HTTPS.'
+        'Camera and microphone are not supported in this browser or context. Ensure you are on HTTPS.'
       );
     }
 
@@ -115,68 +127,64 @@ export const useWebRTC = (appState, roomId) => {
       autoGainControl: true,
     };
 
-    // Constraint profiles in order of preference (most specific → most permissive)
+    // Progressive video constraint fallback: HD → SD → unconstrained
     const videoConstraintProfiles = [
-      // HD — ideal for desktop/high-end phones
       {
         width: { ideal: 960, max: 1280 },
         height: { ideal: 540, max: 720 },
         frameRate: { ideal: 24, max: 30 },
         facingMode: 'user',
       },
-      // SD — works on most mid-range Android phones
-      {
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        facingMode: 'user',
-      },
-      // Bare minimum — any camera, any resolution
-      true,
+      { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+      true, // bare — any camera, any resolution
     ];
 
-    let stream = null;
-    let lastError = null;
+    const acquireStream = async () => {
+      let stream = null;
+      let lastError = null;
 
-    for (const videoConstraint of videoConstraintProfiles) {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: videoConstraint,
-          audio: audioConstraints,
-        });
-        break; // Success — stop trying
-      } catch (err) {
-        console.warn('getUserMedia failed with constraint profile, trying next:', videoConstraint, err);
-        lastError = err;
+      for (const videoConstraint of videoConstraintProfiles) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: videoConstraint,
+            audio: audioConstraints,
+          });
+          break;
+        } catch (err) {
+          console.warn('[WebRTC] getUserMedia failed, trying next constraint:', err.name);
+          lastError = err;
+        }
       }
-    }
 
-    if (!stream) {
-      // Surface a user-friendly error based on the actual error type
-      const name = lastError?.name || '';
-      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-        throw new Error(
-          'Camera/microphone access was denied. Please allow permissions in your browser settings and try again.'
-        );
-      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
-        throw new Error(
-          'No camera or microphone found on this device.'
-        );
-      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
-        throw new Error(
-          'Your camera is already in use by another app. Close it and try again.'
-        );
+      if (!stream) {
+        const name = lastError?.name || '';
+        if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+          throw new Error('Camera/microphone access was denied. Please allow permissions and try again.');
+        } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+          throw new Error('No camera or microphone found on this device.');
+        } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+          throw new Error('Your camera is already in use by another app. Close it and try again.');
+        }
+        throw new Error(lastError?.message || 'Unable to access camera.');
       }
-      throw new Error(
-        lastError?.message || 'Unable to access camera. Please check your device and permissions.'
-      );
-    }
 
-    localStreamRef.current = stream;
-    setIsMicOn(true);
-    setIsCameraOn(true);
-    attachLocalStream(stream);
-    return stream;
+      localStreamRef.current = stream;
+      setIsMicOn(true);
+      setIsCameraOn(true);
+      attachLocalStream(stream);
+
+      // Release promise cache — future calls will reuse localStreamRef directly
+      streamAcquisitionPromiseRef.current = null;
+      console.log('[WebRTC] ✅ Camera acquired successfully.');
+      return stream;
+    };
+
+    // Cache the promise so concurrent callers share it
+    streamAcquisitionPromiseRef.current = acquireStream();
+    return streamAcquisitionPromiseRef.current;
   };
+
+  // ─── Peer Connection ─────────────────────────────────────────────────────────
 
   const closePeerConnection = () => {
     if (peerConnectionRef.current) {
@@ -197,6 +205,7 @@ export const useWebRTC = (appState, roomId) => {
   const stopLocalMedia = () => {
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
     localStreamRef.current = null;
+    streamAcquisitionPromiseRef.current = null; // Cancel any pending acquisition
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null;
     }
@@ -213,7 +222,9 @@ export const useWebRTC = (appState, roomId) => {
     const peer = new RTCPeerConnection(rtcConfig);
     peerConnectionRef.current = peer;
 
-    localStreamRef.current?.getTracks().forEach((track) => {
+    const tracks = localStreamRef.current?.getTracks() ?? [];
+    console.log(`[WebRTC] createPeerConnection — adding ${tracks.length} track(s) to peer.`);
+    tracks.forEach((track) => {
       peer.addTrack(track, localStreamRef.current);
     });
 
@@ -232,19 +243,25 @@ export const useWebRTC = (appState, roomId) => {
         remoteStreamRef.current = remoteStream;
         attachRemoteStream(remoteStream);
         setIsRemoteStreamReady(true);
+        console.log('[WebRTC] ✅ Remote stream received and attached.');
       }
     };
 
     peer.onconnectionstatechange = () => {
+      console.log(`[WebRTC] Connection state: ${peer.connectionState}`);
       if (['failed', 'disconnected'].includes(peer.connectionState)) {
-        setVideoError(
-          'Video connection became unstable. Try Next to reconnect with someone new.'
-        );
+        setVideoError('Video connection became unstable. Try Next to reconnect with someone new.');
       }
+    };
+
+    peer.oniceconnectionstatechange = () => {
+      console.log(`[WebRTC] ICE state: ${peer.iceConnectionState}`);
     };
 
     return peer;
   };
+
+  // ─── ICE Candidate Handling ──────────────────────────────────────────────────
 
   const addPendingIceCandidates = async (peer) => {
     if (!peer.remoteDescription) return;
@@ -254,7 +271,7 @@ export const useWebRTC = (appState, roomId) => {
       try {
         await peer.addIceCandidate(new RTCIceCandidate(candidate));
       } catch (err) {
-        console.warn('ICE candidate addition failed:', err);
+        console.warn('[WebRTC] ICE candidate queued-add failed:', err);
       }
     }
   };
@@ -280,18 +297,18 @@ export const useWebRTC = (appState, roomId) => {
   const handleVideoIceCandidate = async ({ candidate }) => {
     const peer = peerConnectionRef.current;
     if (!candidate) return;
-
     if (!peer || !peer.remoteDescription) {
       pendingIceCandidatesRef.current.push(candidate);
       return;
     }
-
     try {
       await peer.addIceCandidate(new RTCIceCandidate(candidate));
     } catch (err) {
-      console.warn('Direct ICE candidate addition failed:', err);
+      console.warn('[WebRTC] Direct ICE candidate add failed:', err);
     }
   };
+
+  // ─── Media Controls ───────────────────────────────────────────────────────────
 
   const toggleMic = () => {
     const audioTrack = localStreamRef.current?.getAudioTracks()[0];
