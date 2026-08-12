@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import socket from '../socket';
 
+// Bug #4 Fix: Added TURN servers so WebRTC works on carrier/mobile NAT (4G/5G CGNAT/symmetric NAT)
+// Without TURN, peer connections fail on most mobile networks.
 const rtcConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -10,6 +12,22 @@ const rtcConfig = {
     { urls: 'stun:stun4.l.google.com:19302' },
     { urls: 'stun:stun.services.mozilla.com' },
     { urls: 'stun:global.stun.twilio.com:3478' },
+    // Free TURN relay servers — required for symmetric NAT (most mobile carriers)
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
   ],
   iceCandidatePoolSize: 10,
 };
@@ -27,20 +45,58 @@ export const useWebRTC = (appState, roomId) => {
   const peerConnectionRef = useRef(null);
   const pendingIceCandidatesRef = useRef([]);
 
+  // Bug #3 Fix: Poll via rAF until the video DOM ref is mounted, then set srcObject.
+  // This eliminates the race condition where attach*Stream() is called before the
+  // VideoChatRoom component mounts and populates the ref.
+  const attachStreamWhenReady = (videoRefHolder, stream, retries = 30) => {
+    if (!stream) return;
+    const attempt = (remaining) => {
+      if (videoRefHolder.current) {
+        videoRefHolder.current.srcObject = stream;
+        videoRefHolder.current
+          .play()
+          .catch((err) => console.warn('Video play() rejected:', err));
+        return;
+      }
+      if (remaining <= 0) {
+        console.warn('attachStreamWhenReady: ref never mounted after max retries.');
+        return;
+      }
+      requestAnimationFrame(() => attempt(remaining - 1));
+    };
+    attempt(retries);
+  };
+
   const attachLocalStream = (stream = localStreamRef.current) => {
-    if (localVideoRef.current && stream) {
+    if (!stream) return;
+    if (localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
-      localVideoRef.current.play?.().catch(() => {});
+      localVideoRef.current.play?.().catch((err) =>
+        console.warn('Local video play() rejected:', err)
+      );
+    } else {
+      // Ref not yet mounted — wait for it
+      attachStreamWhenReady(localVideoRef, stream);
     }
   };
 
   const attachRemoteStream = (stream = remoteStreamRef.current) => {
-    if (remoteVideoRef.current && stream) {
+    if (!stream) return;
+    if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = stream;
-      remoteVideoRef.current.play?.().catch(() => {});
+      remoteVideoRef.current.play?.().catch((err) =>
+        console.warn('Remote video play() rejected:', err)
+      );
+    } else {
+      // Ref not yet mounted — wait for it
+      attachStreamWhenReady(remoteVideoRef, stream);
     }
   };
 
+  // Bug #1 Fix: Progressive constraint fallback for getUserMedia.
+  // Many phone cameras (especially front-facing on Android) reject the specific
+  // resolution constraints with an OverconstrainedError, causing a silent failure.
+  // We try HD → SD → bare { video: true } to maximise device compatibility.
   const ensureLocalStream = async () => {
     if (localStreamRef.current) {
       attachLocalStream(localStreamRef.current);
@@ -48,21 +104,72 @@ export const useWebRTC = (appState, roomId) => {
     }
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error('Camera and microphone are not available in this browser.');
+      throw new Error(
+        'Camera and microphone are not supported in this browser or context. Make sure you are on HTTPS.'
+      );
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
+    const audioConstraints = {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    };
+
+    // Constraint profiles in order of preference (most specific → most permissive)
+    const videoConstraintProfiles = [
+      // HD — ideal for desktop/high-end phones
+      {
         width: { ideal: 960, max: 1280 },
         height: { ideal: 540, max: 720 },
         frameRate: { ideal: 24, max: 30 },
+        facingMode: 'user',
       },
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
+      // SD — works on most mid-range Android phones
+      {
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        facingMode: 'user',
       },
-    });
+      // Bare minimum — any camera, any resolution
+      true,
+    ];
+
+    let stream = null;
+    let lastError = null;
+
+    for (const videoConstraint of videoConstraintProfiles) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: videoConstraint,
+          audio: audioConstraints,
+        });
+        break; // Success — stop trying
+      } catch (err) {
+        console.warn('getUserMedia failed with constraint profile, trying next:', videoConstraint, err);
+        lastError = err;
+      }
+    }
+
+    if (!stream) {
+      // Surface a user-friendly error based on the actual error type
+      const name = lastError?.name || '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        throw new Error(
+          'Camera/microphone access was denied. Please allow permissions in your browser settings and try again.'
+        );
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        throw new Error(
+          'No camera or microphone found on this device.'
+        );
+      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+        throw new Error(
+          'Your camera is already in use by another app. Close it and try again.'
+        );
+      }
+      throw new Error(
+        lastError?.message || 'Unable to access camera. Please check your device and permissions.'
+      );
+    }
 
     localStreamRef.current = stream;
     setIsMicOn(true);
@@ -130,7 +237,9 @@ export const useWebRTC = (appState, roomId) => {
 
     peer.onconnectionstatechange = () => {
       if (['failed', 'disconnected'].includes(peer.connectionState)) {
-        setVideoError('Video connection became unstable. Try Next to reconnect with someone new.');
+        setVideoError(
+          'Video connection became unstable. Try Next to reconnect with someone new.'
+        );
       }
     };
 

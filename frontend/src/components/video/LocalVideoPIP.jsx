@@ -1,15 +1,23 @@
 import React, { useEffect } from 'react';
 import { VideoOff } from 'lucide-react';
 
+// Bug #3 Fix: Use a callback ref instead of watching attachLocalStream (a stable function
+// reference that never changes, so the useEffect never re-fires after first mount).
+// A callback ref fires exactly once — when the DOM element is inserted into the tree.
 export const LocalVideoPIP = ({ localVideoRef, isCameraOn, attachLocalStream }) => {
-  useEffect(() => {
-    attachLocalStream?.();
-  }, [attachLocalStream]);
+  // Callback ref: called by React when the <video> element is mounted into the DOM.
+  // At this point the ref is guaranteed to be populated, so attachLocalStream() succeeds.
+  const setVideoRef = (node) => {
+    localVideoRef.current = node;
+    if (node) {
+      attachLocalStream?.();
+    }
+  };
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-md">
       <video
-        ref={localVideoRef}
+        ref={setVideoRef}
         autoPlay
         muted
         playsInline

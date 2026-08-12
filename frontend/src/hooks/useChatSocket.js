@@ -16,6 +16,8 @@ export const useChatSocket = (webRTC) => {
   const [isStrangerTyping, setIsStrangerTyping] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState(1);
   const typingTimeoutRef = useRef(null);
+  // Bug #5 Fix: Guard against double-invocation on mobile (touchstart + click both fire).
+  const isStartingVideoRef = useRef(false);
 
   const appStateRef = useRef(appState);
   const roomIdRef = useRef(roomId);
@@ -167,6 +169,10 @@ export const useChatSocket = (webRTC) => {
   };
 
   const startVideoMatching = async () => {
+    // Bug #5 Fix: Mobile browsers fire both touchstart and click events for a single tap.
+    // Without this guard, two concurrent getUserMedia calls race and can corrupt stream state.
+    if (isStartingVideoRef.current) return;
+    isStartingVideoRef.current = true;
     try {
       setActiveMode('video');
       webRTC.setVideoError('');
@@ -179,6 +185,9 @@ export const useChatSocket = (webRTC) => {
       webRTC.setVideoError(error.message || 'Please allow camera and microphone access to start video chat.');
       toast.error('Please allow camera and microphone access.');
       webRTC.cleanupVideoCall();
+    } finally {
+      // Always release the guard so the user can retry if something went wrong
+      isStartingVideoRef.current = false;
     }
   };
 

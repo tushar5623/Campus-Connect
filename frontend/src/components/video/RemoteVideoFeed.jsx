@@ -1,16 +1,30 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { LoaderCircle } from 'lucide-react';
 
+// Bug #2 Fix: Added `muted` to the remote video element.
+//   iOS Safari and Chrome Android REFUSE to autoPlay any video that is not muted,
+//   even when initiated by a user gesture. Without `muted`, the remote stream is
+//   assigned to srcObject but .play() is rejected by the browser silently — the
+//   video element stays black. Audio is carried independently through WebRTC tracks
+//   and is NOT affected by the `muted` attribute on the DOM element.
+//
+// Bug #3 Fix: Same callback ref pattern as LocalVideoPIP — ensures attachRemoteStream
+//   is called only after the DOM element is mounted, eliminating the race condition.
 export const RemoteVideoFeed = ({ remoteVideoRef, isRemoteStreamReady, attachRemoteStream }) => {
-  useEffect(() => {
-    attachRemoteStream?.();
-  }, [attachRemoteStream]);
+  // Callback ref: fires when the <video> node is inserted into the DOM tree.
+  const setVideoRef = (node) => {
+    remoteVideoRef.current = node;
+    if (node) {
+      attachRemoteStream?.();
+    }
+  };
 
   return (
     <div className="relative min-h-[300px] overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl flex items-center justify-center">
       <video
-        ref={remoteVideoRef}
+        ref={setVideoRef}
         autoPlay
+        muted
         playsInline
         className="h-full w-full object-cover"
       />
